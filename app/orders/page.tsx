@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Order, Game } from '@/lib/types/database'
 import { ShoppingBag, DollarSign, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { format } from 'date-fns'
 
 interface OrderWithGame extends Order {
@@ -24,11 +25,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
-  useEffect(() => {
-    if (user) fetchOrders()
-  }, [user])
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     const { data, error } = await supabase
       .from('orders')
       .select('*, games(*)')
@@ -39,7 +36,11 @@ export default function OrdersPage() {
       setOrders(data as OrderWithGame[])
     }
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) fetchOrders()
+  }, [user, fetchOrders])
 
   if (!user) {
     return (
@@ -139,11 +140,13 @@ export default function OrdersPage() {
               <Card key={order.id} className="bg-card/50 border-border/50">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 relative">
+                      <Image
                         src={order.games?.cover_url || 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg'}
-                        alt={order.games?.title}
-                        className="w-full h-full object-cover"
+                        alt={order.games?.title || 'Game cover'}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     </div>
                     <div className="flex-1">

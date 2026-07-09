@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,11 +22,7 @@ export default function CreatorsPage() {
   const [search, setSearch] = useState('')
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    fetchCreators()
-  }, [])
-
-  const fetchCreators = async () => {
+  const fetchCreators = useCallback(async () => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -48,7 +44,11 @@ export default function CreatorsPage() {
       }
     }
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    fetchCreators()
+  }, [fetchCreators])
 
   const handleFollow = async (creator: Profile) => {
     if (!user) {

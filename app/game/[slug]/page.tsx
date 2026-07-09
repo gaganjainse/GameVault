@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
@@ -122,12 +122,7 @@ export default function GameDetailPage() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [newReview, setNewReview] = useState({ rating: 5, title: '', content: '', is_recommended: true })
 
-  useEffect(() => {
-    const slug = params.slug as string
-    fetchGame(slug)
-  }, [params.slug, user])
-
-  const fetchGame = async (slug: string) => {
+  const fetchGame = useCallback(async (slug: string) => {
     const { data, error } = await supabase
       .from('games')
       .select('*')
@@ -232,7 +227,12 @@ export default function GameDetailPage() {
 
     await Promise.all(tasks)
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    const slug = params.slug as string
+    fetchGame(slug)
+  }, [params.slug, fetchGame])
 
   const handlePurchase = async () => {
     if (!user || !game) {

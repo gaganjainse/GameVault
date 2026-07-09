@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -53,22 +53,21 @@ export default function StreamWatchPage() {
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const id = params.id as string
-    fetchStream(id)
-
-    // Simulate real-time chat with polling
-    const interval = setInterval(() => {
-      fetchMessages(id)
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [params.id])
-
-  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const fetchStream = async (id: string) => {
+  const fetchMessages = useCallback(async (streamId: string) => {
+    const { data } = await supabase
+      .from('live_chat_messages')
+      .select('*, profiles(*)')
+      .eq('livestream_id', streamId)
+      .order('created_at', { ascending: true })
+      .limit(100)
+
+    if (data) setMessages(data as ChatMessage[])
+  }, [])
+
+  const fetchStream = useCallback(async (id: string) => {
     const { data, error } = await supabase
       .from('livestreams')
       .select('*, profiles(*)')
@@ -101,18 +100,19 @@ export default function StreamWatchPage() {
       }
     }
     setLoading(false)
-  }
+  }, [user, fetchMessages])
 
-  const fetchMessages = async (streamId: string) => {
-    const { data } = await supabase
-      .from('live_chat_messages')
-      .select('*, profiles(*)')
-      .eq('livestream_id', streamId)
-      .order('created_at', { ascending: true })
-      .limit(100)
+  useEffect(() => {
+    const id = params.id as string
+    fetchStream(id)
 
-    if (data) setMessages(data as ChatMessage[])
-  }
+    // Simulate real-time chat with polling
+    const interval = setInterval(() => {
+      fetchMessages(id)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [params.id, fetchStream, fetchMessages])
 
   const handleFollow = async () => {
     if (!user || !stream) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,19 +38,10 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (user) {
-      fetchConversations()
-      if (targetUserId) {
-        startNewConversation(targetUserId)
-      }
-    }
-  }, [user, targetUserId])
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     const { data: participants } = await supabase
       .from('conversation_participants')
       .select('conversation_id')
@@ -82,9 +73,9 @@ export default function MessagesPage() {
       }
     }
     setLoading(false)
-  }
+  }, [user])
 
-  const startNewConversation = async (userId: string) => {
+  const startNewConversation = useCallback(async (userId: string) => {
     // Create new conversation
     const { data: conv, error: convError } = await supabase
       .from('conversations')
@@ -102,7 +93,16 @@ export default function MessagesPage() {
 
     setSelectedConversation(conv.id)
     fetchConversations()
-  }
+  }, [user, fetchConversations])
+
+  useEffect(() => {
+    if (user) {
+      fetchConversations()
+      if (targetUserId) {
+        startNewConversation(targetUserId)
+      }
+    }
+  }, [user, targetUserId, fetchConversations, startNewConversation])
 
   const fetchMessages = async (conversationId: string) => {
     const { data } = await supabase

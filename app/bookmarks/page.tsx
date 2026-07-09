@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { supabase } from '@/lib/supabase/client'
+import Image from 'next/image'
 import { Game } from '@/lib/types/database'
 import { Bookmark, ShoppingBag, Trash2 } from 'lucide-react'
 import Link from 'next/link'
@@ -25,11 +26,7 @@ export default function BookmarksPage() {
   const [wishlist, setWishlist] = useState<WishlistGame[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (user) fetchWishlist()
-  }, [user])
-
-  const fetchWishlist = async () => {
+  const fetchWishlist = useCallback(async () => {
     const { data, error } = await supabase
       .from('wishlist')
       .select('*, games(*)')
@@ -40,7 +37,11 @@ export default function BookmarksPage() {
       setWishlist(data as WishlistGame[])
     }
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) fetchWishlist()
+  }, [user, fetchWishlist])
 
   const handleRemove = async (id: string) => {
     const { error } = await supabase.from('wishlist').delete().eq('id', id)
@@ -96,10 +97,12 @@ export default function BookmarksPage() {
               <Card key={item.id} className="game-card overflow-hidden group h-full flex flex-col">
                 <Link href={`/game/${item.games.slug}`} className="flex-1 flex flex-col">
                   <div className="aspect-[3/4] relative">
-                    <img
+                    <Image
                       src={item.games.cover_url || 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg'}
                       alt={item.games.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     {item.games.genre && (
                       <Badge className="absolute top-3 right-3">{item.games.genre}</Badge>
