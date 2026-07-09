@@ -4,6 +4,8 @@
 
 @layer base {
   :root {
+    --font-inter: 'Inter Variable', sans-serif;
+    --font-orbitron: 'Orbitron Variable', sans-serif;
     --background: 240 15% 5%;
     --foreground: 0 0% 98%;
     --card: 240 12% 8%;
