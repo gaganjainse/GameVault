@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Button } from '@/components/ui/button'
@@ -19,9 +19,18 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signUp, signInWithOAuth } = useAuth()
+  const { signUp, signInWithOAuth, user } = useAuth()
   const router = useRouter()
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
+
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect') || '/feed'
+
+  useEffect(() => {
+    if (user) {
+      router.replace(redirectPath)
+    }
+  }, [user, redirectPath, router])
 
   const passwordRequirements = [
     { test: password.length >= 8, label: 'At least 8 characters' },
@@ -53,7 +62,7 @@ export default function SignupPage() {
       })
     } else {
       toast.success('Account created successfully!')
-      router.push('/feed')
+      router.push(redirectPath)
     }
 
     setLoading(false)

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Button } from '@/components/ui/button'
@@ -17,9 +17,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signIn, signInWithOAuth } = useAuth()
+  const { signIn, signInWithOAuth, user } = useAuth()
   const router = useRouter()
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect') || '/feed'
+
+  useEffect(() => {
+    if (user) {
+      router.replace(redirectPath)
+    }
+  }, [user, redirectPath, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +41,7 @@ export default function LoginPage() {
       })
     } else {
       toast.success('Welcome back!')
-      router.push('/feed')
+      router.push(redirectPath)
     }
 
     setLoading(false)
