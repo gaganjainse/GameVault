@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
@@ -75,13 +75,7 @@ export default function CartPage() {
     }
   }, [loading, user, router])
 
-  useEffect(() => {
-    if (user) {
-      fetchCartItems()
-    }
-  }, [user])
-
-  const fetchCartItems = async () => {
+  const fetchCartItems = useCallback(async () => {
     const { data, error } = await supabase
       .from('cart_items')
       .select(
@@ -105,7 +99,13 @@ export default function CartPage() {
       setCartItems(data as unknown as CartItemWithDetails[])
     }
     setLoadingCart(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      fetchCartItems()
+    }
+  }, [user, fetchCartItems])
 
   const resolveGame = (item: CartItemWithDetails): GameInfo | null => {
     if (item.item_type === 'resale') {
@@ -128,59 +128,22 @@ export default function CartPage() {
     if (!user || cartItems.length === 0) return
     setCheckingOut(true)
     try {
-      for (const item of cartItems) {
-        const game = resolveGame(item)
-        if (!game) continue
+      // Checkout is handled entirely server-side by the checkout_cart()
+      // Postgres function: it re-derives each item's price from `games`/
+      // `listings` (ignoring whatever price the client sends), and creates
+      // the order + owned_asset + listing update + cart cleanup atomically
+      // in a single transaction. The client can no longer set an order's
+      // price or mark it "completed" directly (see migration 010).
+      //
+      // Note: this closes the price/status-tampering hole and makes
+      // checkout all-or-nothing, but a real payment charge (Stripe/Razorpay
+      // etc.) should still confirm payment before this RPC is called.
+      const { data, error } = await supabase.rpc('checkout_cart', {
+        p_item_ids: cartItems.map((item) => item.id),
+      })
 
-        const itemPrice = Number(item.price)
-        const platformFee = itemPrice * 0.1
-        const sellerAmount =
-          item.item_type === 'resale' ? itemPrice - platformFee : 0
-
-        // Create order
-        const { error: orderError } = await supabase.from('orders').insert({
-          buyer_id: user.id,
-          seller_id:
-            item.item_type === 'resale' ? item.listings?.seller_id ?? null : null,
-          listing_id: item.listing_id,
-          game_id: game.id,
-          order_type: item.item_type,
-          status: 'completed',
-          total_amount: itemPrice,
-          platform_fee: platformFee,
-          royalty_amount: 0,
-          seller_amount: sellerAmount,
-          completed_at: new Date().toISOString(),
-        })
-        if (orderError) throw orderError
-
-        // Create owned asset
-        const { error: assetError } = await supabase.from('owned_assets').insert({
-          user_id: user.id,
-          game_id: game.id,
-          asset_id: crypto.randomUUID(),
-          purchase_price: itemPrice,
-          is_installed: false,
-          is_listed: false,
-          play_time_hours: 0,
-        })
-        if (assetError) throw assetError
-
-        // If resale, mark listing as sold
-        if (item.item_type === 'resale' && item.listing_id) {
-          await supabase
-            .from('listings')
-            .update({ status: 'sold' })
-            .eq('id', item.listing_id)
-        }
-      }
-
-      // Clear cart
-      const { error: deleteError } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', user.id)
-      if (deleteError) throw deleteError
+      if (error) throw error
+      if (!data?.success) throw new Error('Checkout did not complete')
 
       setCartItems([])
       toast.success('Checkout complete! Your games are now in your vault.')
