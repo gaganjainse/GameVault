@@ -508,7 +508,7 @@ export default function LandingPage() {
       </div>
     </AppLayout>
   ) : (
-    <div className="space-y-12 pb-8">
+    <div className="space-y-12 pb-8 px-4 sm:px-6 lg:px-8 pt-6">
       {/* Hero Carousel */}
       {featuredGames.length > 0 && (
         <section className="relative h-[420px] sm:h-[500px] rounded-2xl overflow-hidden">
