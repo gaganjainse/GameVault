@@ -25,6 +25,7 @@ import {
   Link2,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 import {
@@ -445,8 +446,8 @@ function PostCard({
       <CardContent className="pb-3">
         <p className="whitespace-pre-wrap">{post.content}</p>
         {post.media_url && (
-          <div className="mt-3 rounded-lg overflow-hidden">
-            <img src={post.media_url} alt="Post media" className="w-full max-h-96 object-cover" />
+          <div className="mt-3 rounded-lg overflow-hidden relative w-full h-96">
+            <Image src={post.media_url} alt="Post media" fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" />
           </div>
         )}
       </CardContent>

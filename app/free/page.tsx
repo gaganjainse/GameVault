@@ -21,6 +21,7 @@ import {
   Home,
   ChevronRight,
   Sparkles,
+  Download,
 } from 'lucide-react'
 import { Game } from '@/lib/types/database'
 
@@ -66,6 +67,7 @@ export default function FreeGamesPage() {
 
   const [activePromo, setActivePromo] = useState<FreePromotion | null>(null)
   const [pastPromos, setPastPromos] = useState<PastPromotion[]>([])
+  const [allFreeGames, setAllFreeGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [claiming, setClaiming] = useState(false)
   const [owned, setOwned] = useState(false)
@@ -114,6 +116,20 @@ export default function FreeGamesPage() {
       console.error(pastError)
     } else if (pastData) {
       setPastPromos(pastData as PastPromotion[])
+    }
+
+    // All free games (price = 0) — not tied to the promotion system
+    const { data: freeGamesData, error: freeGamesError } = await supabase
+      .from('games')
+      .select('*')
+      .eq('price', 0)
+      .eq('is_active', true)
+      .order('downloads_count', { ascending: false })
+
+    if (freeGamesError) {
+      console.error(freeGamesError)
+    } else if (freeGamesData) {
+      setAllFreeGames(freeGamesData as Game[])
     }
 
     setLoading(false)
@@ -243,6 +259,12 @@ export default function FreeGamesPage() {
 
   const originalPrice = activePromo?.original_price ?? activePromo?.games.price ?? 0
 
+  // Free games (price = 0) that aren't already shown via the promotion hero/archive
+  const promoGameIds = new Set<string>()
+  if (activePromo) promoGameIds.add(activePromo.game_id)
+  pastPromos.forEach((p) => promoGameIds.add(p.game_id))
+  const visibleFreeGames = allFreeGames.filter((g) => !promoGameIds.has(g.id))
+
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto">
@@ -297,6 +319,23 @@ export default function FreeGamesPage() {
               <Skeleton className="h-7 w-48 mb-4" />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[...Array(4)].map((_, i) => (
+                  <Card key={i} className="game-card overflow-hidden">
+                    <Skeleton className="aspect-video w-full" />
+                    <CardContent className="p-4 space-y-3">
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-9 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* All Free Games skeleton */}
+            <div>
+              <Skeleton className="h-7 w-40 mb-4" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
                   <Card key={i} className="game-card overflow-hidden">
                     <Skeleton className="aspect-video w-full" />
                     <CardContent className="p-4 space-y-3">
@@ -475,14 +514,28 @@ export default function FreeGamesPage() {
                       ) : checkingOwnership ? (
                         <Skeleton className="h-12 w-full" />
                       ) : (
-                        <Button
-                          className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90 text-lg py-6"
-                          onClick={handleClaim}
-                          disabled={claiming || timeRemaining.expired}
-                        >
-                          <Gift className="h-5 w-5 mr-2" />
-                          {claiming ? 'Claiming...' : timeRemaining.expired ? 'Expired' : 'Claim Now'}
-                        </Button>
+                        activePromo.games.download_url && !claiming && !timeRemaining.expired ? (
+                          <Button asChild className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90 text-lg py-6">
+                            <a
+                              href={activePromo.games.download_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={handleClaim}
+                            >
+                              <Gift className="h-5 w-5 mr-2" />
+                              Claim Now
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button
+                            className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90 text-lg py-6"
+                            onClick={handleClaim}
+                            disabled={claiming || timeRemaining.expired}
+                          >
+                            <Gift className="h-5 w-5 mr-2" />
+                            {claiming ? 'Claiming...' : timeRemaining.expired ? 'Expired' : 'Claim Now'}
+                          </Button>
+                        )
                       )}
 
                       {!user && !owned && !checkingOwnership && (
@@ -537,6 +590,33 @@ export default function FreeGamesPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* All Free Games — every free game on the platform, not just promoted ones */}
+        {!loading && (
+          <div className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold font-display flex items-center gap-2">
+                <Download className="h-5 w-5 text-accent" />
+                All Free Games
+              </h2>
+              <span className="text-sm text-muted-foreground">{visibleFreeGames.length} free games</span>
+            </div>
+
+            {visibleFreeGames.length === 0 ? (
+              <Card className="bg-card/50 border-border/50 p-12 text-center">
+                <Gift className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No free games available</h3>
+                <p className="text-muted-foreground">Free games will appear here as they&apos;re added to the platform.</p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {visibleFreeGames.map((game) => (
+                  <FreeGameCard key={game.id} game={game} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -599,5 +679,62 @@ function PastPromoCard({ promo }: { promo: PastPromotion }) {
         </CardContent>
       </Card>
     </Link>
+  )
+}
+
+function FreeGameCard({ game }: { game: Game }) {
+  const downloadUrl = game.download_url
+
+  return (
+    <Card className="game-card group overflow-hidden h-full flex flex-col">
+      {/* Cover image */}
+      <div className="relative aspect-video overflow-hidden">
+        {game.cover_url ? (
+          <Image
+            src={game.cover_url}
+            alt={game.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+        <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground">
+          <Gift className="h-3 w-3 mr-1" /> FREE
+        </Badge>
+      </div>
+
+      <CardContent className="p-4 flex-1 flex flex-col">
+        <h3 className="font-semibold line-clamp-1">{game.title}</h3>
+        <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{game.developer}</p>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+          {game.genre && <Badge variant="secondary" className="text-xs">{game.genre}</Badge>}
+          {game.rating_count > 0 && (
+            <span className="flex items-center gap-1">
+              <Star className="h-3 w-3 text-warning fill-warning" />
+              {game.rating_average.toFixed(1)}
+            </span>
+          )}
+        </div>
+
+        {downloadUrl ? (
+          <Button asChild size="sm" className="mt-auto w-full bg-accent hover:opacity-90 text-accent-foreground">
+            <a href={downloadUrl} target="_blank" rel="noopener noreferrer">
+              <Download className="h-3.5 w-3.5 mr-2" /> Download Free
+            </a>
+          </Button>
+        ) : (
+          <Button asChild size="sm" variant="outline" className="mt-auto w-full">
+            <Link href={`/game/${game.slug}`}>
+              <Gift className="h-3.5 w-3.5 mr-2" /> Play Now <ArrowRight className="h-3.5 w-3.5 ml-2" />
+            </Link>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   )
 }

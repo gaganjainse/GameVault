@@ -61,6 +61,7 @@ type GameWithExtras = {
   rating_count: number
   is_featured: boolean
   minimum_price: number | null
+  download_url: string | null
 }
 
 type Screenshot = {
@@ -787,7 +788,11 @@ export default function GameDetailPage() {
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="text-sm text-muted-foreground mb-1">Price</div>
-                  <div className="text-4xl font-display font-bold text-primary">${game.price.toFixed(2)}</div>
+                  {game.price === 0 ? (
+                    <div className="text-4xl font-display font-bold text-success">FREE</div>
+                  ) : (
+                    <div className="text-4xl font-display font-bold text-primary">${game.price.toFixed(2)}</div>
+                  )}
                 </div>
 
                 {owned ? (
@@ -795,6 +800,13 @@ export default function GameDetailPage() {
                     <Badge className="w-full justify-center py-2 bg-success/20 text-success text-sm">
                       <Shield className="h-4 w-4 mr-2" /> You Own This Game
                     </Badge>
+                    {game.price === 0 && game.download_url && (
+                      <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg py-6">
+                        <a href={game.download_url} target="_blank" rel="noopener noreferrer">
+                          <Play className="h-5 w-5 mr-2" /> Play Now
+                        </a>
+                      </Button>
+                    )}
                     <Button asChild variant="outline" className="w-full">
                       <Link href="/vault"><Play className="h-4 w-4 mr-2" /> View in Vault</Link>
                     </Button>
@@ -806,18 +818,29 @@ export default function GameDetailPage() {
                   </div>
                 ) : (
                   <>
-                    <Button
-                      className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg py-6 mb-3"
-                      onClick={handlePurchase}
-                      disabled={purchasing}
-                    >
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      {purchasing ? 'Purchasing...' : 'Buy Now'}
-                    </Button>
+                    {game.price === 0 && game.download_url ? (
+                      <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg py-6 mb-3">
+                        <a href={game.download_url} target="_blank" rel="noopener noreferrer">
+                          <Play className="h-5 w-5 mr-2" />
+                          Download Free
+                        </a>
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg py-6 mb-3"
+                          onClick={handlePurchase}
+                          disabled={purchasing}
+                        >
+                          <ShoppingCart className="h-5 w-5 mr-2" />
+                          {purchasing ? 'Purchasing...' : 'Buy Now'}
+                        </Button>
 
-                    <Button variant="outline" className="w-full mb-3" onClick={handleAddToCart}>
-                      <Plus className="h-4 w-4 mr-2" /> Add to Cart
-                    </Button>
+                        <Button variant="outline" className="w-full mb-3" onClick={handleAddToCart}>
+                          <Plus className="h-4 w-4 mr-2" /> Add to Cart
+                        </Button>
+                      </>
+                    )}
 
                     {/* Fixed: wishlist + share buttons in a flex container */}
                     <div className="flex gap-2 mb-4">

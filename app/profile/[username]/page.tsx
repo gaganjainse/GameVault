@@ -30,6 +30,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow, format } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -186,7 +187,7 @@ export default function ProfilePage() {
         {/* Banner */}
         <div className="relative h-48 md:h-64 rounded-xl overflow-hidden mb-6">
           {profile.banner_url ? (
-            <img src={profile.banner_url} alt="Banner" className="w-full h-full object-cover" />
+            <Image src={profile.banner_url} alt="Banner" fill sizes="(max-width: 768px) 100vw, 1024px" className="object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20" />
           )}
@@ -346,7 +347,9 @@ export default function ProfilePage() {
                   <CardContent className="p-4">
                     <p className="whitespace-pre-wrap mb-3">{post.content}</p>
                     {post.media_url && (
-                      <img src={post.media_url} alt="Post" className="rounded-lg w-full max-h-96 object-cover" />
+                      <div className="relative w-full h-96 rounded-lg overflow-hidden">
+                        <Image src={post.media_url} alt="Post" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
+                      </div>
                     )}
                     <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
                       <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
@@ -370,7 +373,7 @@ export default function ProfilePage() {
                   <Link key={video.id} href={`/video/${video.id}`}>
                     <Card className="game-card overflow-hidden">
                       <div className="aspect-video relative">
-                        <img src={video.thumbnail_url || ''} alt={video.title} className="w-full h-full object-cover" />
+                        <Image src={video.thumbnail_url || ''} alt={video.title} fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
                         <Badge className="absolute bottom-2 right-2">{video.duration || '0:00'}</Badge>
                       </div>
                       <CardContent className="p-4">
@@ -393,7 +396,7 @@ export default function ProfilePage() {
                   <Link key={asset.id} href="/vault">
                     <Card className="vault-card overflow-hidden">
                       <div className="aspect-[3/4] relative">
-                        <img src={asset.games?.cover_url || ''} alt={asset.games?.title} className="w-full h-full object-cover" />
+                        <Image src={asset.games?.cover_url || ''} alt={asset.games?.title} fill sizes="(max-width: 768px) 50vw, 200px" className="object-cover" />
                         <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
                           <p className="font-medium text-sm line-clamp-1">{asset.games?.title}</p>
                         </div>
