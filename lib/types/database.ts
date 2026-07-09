@@ -140,6 +140,7 @@ export interface Database {
           rating_count: number
           is_featured: boolean
           minimum_price: number | null
+          download_url: string | null
           created_at: string
           updated_at: string
         }
@@ -164,6 +165,7 @@ export interface Database {
           rating_count?: number
           is_featured?: boolean
           minimum_price?: number | null
+          download_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -188,6 +190,7 @@ export interface Database {
           rating_count?: number
           is_featured?: boolean
           minimum_price?: number | null
+          download_url?: string | null
           created_at?: string
           updated_at?: string
         }

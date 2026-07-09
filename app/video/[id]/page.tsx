@@ -24,6 +24,7 @@ import {
   Send,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { useAuth } from '@/lib/auth/auth-context'
 import { toast } from 'sonner'
@@ -337,7 +338,7 @@ export default function VideoWatchPage() {
               <Link key={related.id} href={`/video/${related.id}`}>
                 <div className="flex gap-3 group">
                   <div className="w-40 aspect-video rounded-lg overflow-hidden relative flex-shrink-0">
-                    <img src={related.thumbnail_url || ''} alt={related.title} className="w-full h-full object-cover" />
+                    <Image src={related.thumbnail_url || ''} alt={related.title} fill sizes="160px" className="object-cover" />
                     <Badge className="absolute bottom-1 right-1 text-xs">{related.duration || '0:00'}</Badge>
                   </div>
                   <div className="flex-1">

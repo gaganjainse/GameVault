@@ -15,7 +15,7 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
       <div className="flex flex-1">
         {showSidebar && <Sidebar />}
         <main className="flex-1">
-          <div className="container py-6 px-4 lg:px-8 pb-20 lg:pb-6">
+          <div className="container mx-auto py-6 px-4 lg:px-8 pb-20 lg:pb-6">
             {children}
           </div>
         </main>
