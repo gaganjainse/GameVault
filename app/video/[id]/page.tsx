@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -47,12 +47,7 @@ export default function VideoWatchPage() {
   const [likeCount, setLikeCount] = useState(0)
   const [actionLoading, setActionLoading] = useState(false)
 
-  useEffect(() => {
-    const id = params.id as string
-    fetchVideo(id)
-  }, [params.id])
-
-  const fetchVideo = async (id: string) => {
+  const fetchVideo = useCallback(async (id: string) => {
     const { data, error } = await supabase
       .from('videos')
       .select('*, profiles(*)')
@@ -110,7 +105,12 @@ export default function VideoWatchPage() {
     }
 
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    const id = params.id as string
+    fetchVideo(id)
+  }, [params.id, fetchVideo])
 
   const handleLike = async () => {
     if (!user || !video) {

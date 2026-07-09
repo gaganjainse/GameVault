@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Video, Profile } from '@/lib/types/database'
 import { Search, Video as VideoIcon, TrendingUp, Clock, Eye } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 
 interface VideoWithProfile extends Video {
@@ -24,11 +25,7 @@ export default function VideosPage() {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('newest')
 
-  useEffect(() => {
-    fetchVideos()
-  }, [sortBy])
-
-  const fetchVideos = async () => {
+  const fetchVideos = useCallback(async () => {
     setLoading(true)
     let query = supabase
       .from('videos')
@@ -49,7 +46,11 @@ export default function VideosPage() {
       setVideos(data as VideoWithProfile[])
     }
     setLoading(false)
-  }
+  }, [sortBy])
+
+  useEffect(() => {
+    fetchVideos()
+  }, [sortBy, fetchVideos])
 
   const filtered = videos.filter(v =>
     v.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -118,10 +119,12 @@ export default function VideosPage() {
               <Link key={video.id} href={`/video/${video.id}`}>
                 <Card className="game-card overflow-hidden group cursor-pointer h-full">
                   <div className="aspect-video relative">
-                    <img
+                    <Image
                       src={video.thumbnail_url || 'https://images.pexels.com/photos/1670988/pexels-photo-1670988.jpeg'}
                       alt={video.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <span className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 rounded text-xs">
                       {formatDuration(video.duration)}

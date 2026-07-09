@@ -65,11 +65,7 @@ export default function FeedPage() {
   const [postComments, setPostComments] = useState<Record<string, CommentWithProfile[]>>({})
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({})
 
-  useEffect(() => {
-    fetchPosts()
-  }, [user])
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     const { data, error } = await supabase
       .from('posts')
       .select('*, profiles(*)')
@@ -93,7 +89,11 @@ export default function FeedPage() {
       }
     }
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    fetchPosts()
+  }, [user, fetchPosts])
 
   const handlePost = async () => {
     if (!newPostContent.trim() || !user) return

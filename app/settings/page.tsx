@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -42,13 +42,7 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(true)
   const [privacyLevel, setPrivacyLevel] = useState('public')
 
-  useEffect(() => {
-    if (user) {
-      fetchSettings()
-    }
-  }, [user])
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     const { data } = await supabase
       .from('user_settings')
       .select('*')
@@ -61,7 +55,13 @@ export default function SettingsPage() {
       setDarkMode(data.dark_mode ?? true)
       setPrivacyLevel(data.privacy_level || 'public')
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      fetchSettings()
+    }
+  }, [user, fetchSettings])
 
   const handleSaveProfile = async () => {
     if (!user) return
@@ -348,7 +348,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Show Activity Status</p>
-                      <p className="text-sm text-muted-foreground">When you're online or playing</p>
+                      <p className="text-sm text-muted-foreground">When you&apos;re online or playing</p>
                     </div>
                     <Switch defaultChecked />
                   </div>

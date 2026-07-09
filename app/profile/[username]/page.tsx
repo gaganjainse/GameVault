@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
@@ -61,12 +61,7 @@ export default function ProfilePage() {
   const [followLoading, setFollowLoading] = useState(false)
   const isOwnProfile = currentUser && profile && currentUser.id === profile.id
 
-  useEffect(() => {
-    const username = params.username as string
-    fetchProfile(username)
-  }, [params.username])
-
-  const fetchProfile = async (username: string) => {
+  const fetchProfile = useCallback(async (username: string) => {
     // Fetch profile
     const { data: profileData, error } = await supabase
       .from('profiles')
@@ -124,7 +119,12 @@ export default function ProfilePage() {
     }
 
     setLoading(false)
-  }
+  }, [currentUser])
+
+  useEffect(() => {
+    const username = params.username as string
+    fetchProfile(username)
+  }, [params.username, fetchProfile])
 
   const handleFollow = async () => {
     if (!currentUser || !profile) return

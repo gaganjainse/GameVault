@@ -28,6 +28,7 @@ import {
   Info,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -195,11 +196,13 @@ export default function ListingDetailPage() {
             <Card className="bg-card/50 border-border/50">
               <CardContent className="p-6">
                 <div className="flex gap-6">
-                  <div className="w-32 h-44 rounded-lg overflow-hidden flex-shrink-0">
-                    <img
+                  <div className="w-32 h-44 rounded-lg overflow-hidden flex-shrink-0 relative">
+                    <Image
                       src={game.cover_url || 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg'}
                       alt={game.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="128px"
+                      className="object-cover"
                     />
                   </div>
                   <div className="flex-1">

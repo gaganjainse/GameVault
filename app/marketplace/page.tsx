@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -44,11 +45,7 @@ export default function MarketplacePage() {
   const [viewMode, setViewMode] = useState<'primary' | 'resale'>('primary')
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [viewMode])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -83,7 +80,11 @@ export default function MarketplacePage() {
     }
 
     setLoading(false)
-  }
+  }, [viewMode])
+
+  useEffect(() => {
+    fetchData()
+  }, [viewMode, fetchData])
 
   const filteredGames = games
     .filter(game => {
@@ -275,10 +276,12 @@ function GameCard({ game }: { game: Game }) {
     <Link href={`/game/${game.slug}`}>
       <Card className="game-card overflow-hidden group cursor-pointer h-full flex flex-col">
         <div className="aspect-[3/4] relative">
-          <img
+          <Image
             src={game.cover_url || 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg'}
             alt={game.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
           {game.genre && (
@@ -327,10 +330,12 @@ function ListingCard({ listing }: { listing: ListingWithDetails }) {
     <Link href={`/listing/${listing.id}`} onClick={(e) => e.stopPropagation()}>
       <Card className="vault-card overflow-hidden group cursor-pointer h-full flex flex-col">
         <div className="aspect-[3/4] relative">
-          <img
+          <Image
             src={game.cover_url || 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg'}
             alt={game.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
           <Badge className="absolute top-3 left-3 bg-warning/20 text-warning">

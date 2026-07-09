@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,11 +35,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationWithProfile[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (user) fetchNotifications()
-  }, [user])
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
@@ -51,7 +47,11 @@ export default function NotificationsPage() {
       setNotifications(data)
     }
     setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) fetchNotifications()
+  }, [user, fetchNotifications])
 
   const markAsRead = async (id: string) => {
     await supabase

@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Livestream, Profile } from '@/lib/types/database'
 import { Radio, Users, Eye, Video as VideoIcon } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 
 interface StreamWithProfile extends Livestream {
@@ -133,10 +134,12 @@ function StreamCard({ stream, ended }: { stream: StreamWithProfile; ended?: bool
     <Link href={`/stream/${stream.id}`}>
       <Card className="game-card overflow-hidden group cursor-pointer h-full">
         <div className="aspect-video relative">
-          <img
+          <Image
             src={stream.thumbnail_url || 'https://images.pexels.com/photos/1670988/pexels-photo-1670988.jpeg'}
             alt={stream.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
           {!ended && (
             <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 bg-destructive rounded-full">

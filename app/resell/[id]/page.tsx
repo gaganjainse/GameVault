@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
@@ -27,6 +27,7 @@ import {
   ChevronLeft,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { toast } from 'sonner'
 
 interface AssetWithGame extends OwnedAsset {
@@ -42,12 +43,7 @@ export default function ResellPage() {
   const [price, setPrice] = useState('')
   const [listing, setListing] = useState(false)
 
-  useEffect(() => {
-    const id = params.id as string
-    fetchAsset(id)
-  }, [params.id])
-
-  const fetchAsset = async (id: string) => {
+  const fetchAsset = useCallback(async (id: string) => {
     const { data, error } = await supabase
       .from('owned_assets')
       .select('*, games(*)')
@@ -65,7 +61,12 @@ export default function ResellPage() {
       setPrice(data.purchase_price.toString())
     }
     setLoading(false)
-  }
+  }, [user, router])
+
+  useEffect(() => {
+    const id = params.id as string
+    fetchAsset(id)
+  }, [params.id, fetchAsset])
 
   const handleCreateListing = async () => {
     if (!asset || !user || !price) return
@@ -154,11 +155,13 @@ export default function ResellPage() {
           <Card className="bg-card/50 border-border/50">
             <CardContent className="p-6">
               <div className="flex gap-4">
-                <div className="w-24 h-32 rounded-lg overflow-hidden">
-                  <img
+                <div className="w-24 h-32 rounded-lg overflow-hidden relative">
+                  <Image
                     src={asset.games.cover_url || 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg'}
                     alt={asset.games.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="96px"
+                    className="object-cover"
                   />
                 </div>
                 <div className="flex-1">
