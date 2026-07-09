@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     template: '%s | GameVault',
   },
   description: 'The ultimate gaming network. Discover games, connect with creators, build your vault, and trade digital assets.',
+  icons: {
+    icon: '/favicon.ico',
+  },
   openGraph: {
     title: 'GameVault - Own, Play, Trade',
     description: 'The ultimate gaming network. Discover games, connect with creators, build your vault, and trade digital assets.',
