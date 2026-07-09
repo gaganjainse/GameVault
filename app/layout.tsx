@@ -1,11 +1,14 @@
 import './globals.css'
+import '@fontsource-variable/inter'
+import '@fontsource-variable/orbitron'
 import type { Metadata } from 'next'
-import { Inter, Orbitron } from 'next/font/google'
 import { Providers } from '@/components/providers/auth-provider'
 import { Toaster } from '@/components/ui/sonner'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' })
+// Fonts are self-hosted via @fontsource (bundled at build time, no runtime
+// call to Google's CDN) rather than next/font/google, which needs network
+// access to fonts.googleapis.com during every build — this removes that
+// dependency and avoids sending visitors' IPs to Google when the page loads.
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://gamevault.app'),
@@ -54,7 +57,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${orbitron.variable} font-sans antialiased`}>
+      <body className="font-sans antialiased">
         <Providers>
           {children}
           <Toaster position="bottom-right" richColors />
