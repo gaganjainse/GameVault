@@ -26,6 +26,7 @@ export interface Database {
           posts_count: number
           vault_count: number
           is_curator: boolean
+          role: string
           created_at: string
           updated_at: string
         }
@@ -45,6 +46,7 @@ export interface Database {
           posts_count?: number
           vault_count?: number
           is_curator?: boolean
+          role?: string
           created_at?: string
           updated_at?: string
         }
@@ -64,6 +66,7 @@ export interface Database {
           posts_count?: number
           vault_count?: number
           is_curator?: boolean
+          role?: string
           created_at?: string
           updated_at?: string
         }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '@/lib/auth/auth-context'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -54,11 +54,7 @@ export default function AdminDashboard() {
   const [newPromotion, setNewPromotion] = useState({ gameId: '', endDate: '' })
   const [newDevlog, setNewDevlog] = useState({ gameId: '', title: '', content: '' })
 
-  useEffect(() => {
-    if (user) fetchAdminData()
-  }, [user])
-
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     const [usersRes, gamesRes, ordersRes, reportsRes, recentUsersRes, allGamesRes, promotionsRes, creatorGamesRes] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('games').select('id', { count: 'exact', head: true }),
@@ -85,7 +81,11 @@ export default function AdminDashboard() {
     setActivePromotions(promotionsRes.data || [])
     setCreatorGames(creatorGamesRes.data || [])
     setLoading(false)
-  }
+  }, [profile])
+
+  useEffect(() => {
+    if (user) fetchAdminData()
+  }, [user, fetchAdminData])
 
   const handleCreatePromotion = async () => {
     if (!newPromotion.gameId || !newPromotion.endDate) {
@@ -148,6 +148,20 @@ export default function AdminDashboard() {
         <div className="max-w-6xl mx-auto text-center py-20">
           <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
           <p className="text-muted-foreground">Sign in to access admin features</p>
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // Server-side middleware already redirects non-admins away from /admin;
+  // this is a client-side backstop (e.g. while the profile is still loading)
+  // so the dashboard never renders for a signed-in non-admin account.
+  if (!loading && profile && !['admin', 'moderator'].includes(profile.role)) {
+    return (
+      <AppLayout>
+        <div className="max-w-6xl mx-auto text-center py-20">
+          <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
+          <p className="text-muted-foreground">You don&apos;t have permission to view this page.</p>
         </div>
       </AppLayout>
     )
