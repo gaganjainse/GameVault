@@ -15,11 +15,27 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
+
       - name: Install
-        run: npm ci --no-audit --no-fund 2>/dev/null || npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      # NEXT_PUBLIC_* values are public by definition (shipped to the browser);
+      # the build only needs non-empty placeholders so static pages can
+      # prerender. Real values come from the deploy platform (Netlify/Vercel).
       - name: Build
-        run: npm run build 2>/dev/null || npm test 2>/dev/null || echo "no build script — install gate passed"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npm run build
