@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { Gamepad2, Mail, Lock, Eye, EyeOff, User, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-export default function SignupPage() {
+function SignupPageContent() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -264,4 +264,18 @@ export default function SignupPage() {
       </Card>
     </div>
   )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+          Loading…
+        </div>
+      }
+    >
+      <SignupPageContent />
+    </Suspense>
+  );
 }

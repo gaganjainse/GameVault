@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -92,7 +92,7 @@ const DEFAULT_COVER =
 // Main page
 // ---------------------------------------------------------------------------
 
-export default function ExplorePage() {
+function ExplorePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
@@ -816,4 +816,18 @@ function parseTagsParam(param: string | null): string[] {
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+          Loading…
+        </div>
+      }
+    >
+      <ExplorePageContent />
+    </Suspense>
+  );
 }

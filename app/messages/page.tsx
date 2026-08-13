@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { Suspense, useEffect, useState, useRef, useCallback } from 'react'
 import { AppLayout } from '@/components/layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -24,7 +24,7 @@ interface ConversationWithParticipants {
   messages: { content: string; created_at: string; sender_id: string }[]
 }
 
-export default function MessagesPage() {
+function MessagesPageContent() {
   const { user, profile } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -315,4 +315,18 @@ export default function MessagesPage() {
       </div>
     </AppLayout>
   )
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+          Loading…
+        </div>
+      }
+    >
+      <MessagesPageContent />
+    </Suspense>
+  );
 }
