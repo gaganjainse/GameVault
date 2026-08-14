@@ -2,7 +2,7 @@
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+![License](https://img.shields.io/badge/License-GPL--3.0--or--later-blue?style=for-the-badge)
 
 A social gaming marketplace: discover and buy games, follow creators, post to a social feed, watch livestreams and video uploads, and resell owned digital assets.
 
@@ -83,3 +83,7 @@ supabase/       SQL migrations — this is the source of truth for the schema, R
 | `npm start` | Run the production build |
 | `npm run lint` | Lint the codebase (ESLint) |
 | `npx tsc --noEmit` | Type-check without emitting files |
+
+## License
+
+GPL-3.0-or-later — see [LICENSE](LICENSE).
