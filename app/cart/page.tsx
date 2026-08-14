@@ -156,7 +156,7 @@ export default function CartPage() {
   }
 
   // Loading / redirecting state
-  if (loading || (!loading && !user)) {
+  if (loading || !user) {
     return (
       <AppLayout>
         <div className="max-w-4xl mx-auto">
