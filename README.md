@@ -3,7 +3,7 @@
 > **A social gaming marketplace.** Discover and buy games, follow creators, post to
 > a social feed, watch livestreams and video uploads, and resell owned digital assets.
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript) ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs) ![License](https://img.shields.io/badge/License-GPL--3.0--or--later-blue?style=for-the-badge) ![CI](https://img.shields.io/github/actions/workflow/status/gaganjainse/GameVault/ci.yml?style=for-the-badge&label=CI)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript) ![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs) ![License](https://img.shields.io/badge/License-GPL--3.0--or--later-blue) ![CI](https://github.com/gaganjainse/GameVault/actions/workflows/ci.yml/badge.svg)
 
 - **License:** GPL-3.0-or-later
 - **Owner:** Gagan Jain ([@gaganjainse](https://github.com/gaganjainse))
