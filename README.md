@@ -1,10 +1,14 @@
 # GameVault
 
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+
 A social gaming marketplace: discover and buy games, follow creators, post to a social feed, watch livestreams and video uploads, and resell owned digital assets.
 
 ## Stack
 
-- **Framework:** Next.js 13 (App Router) + TypeScript
+- **Framework:** Next.js 15 (App Router) + React 19 + TypeScript
 - **Database / Auth:** Supabase (Postgres, Row Level Security, Auth)
 - **UI:** Tailwind CSS + shadcn/ui (Radix primitives)
 - **Fonts:** Inter & Orbitron, self-hosted via `@fontsource`
@@ -77,5 +81,5 @@ supabase/       SQL migrations — this is the source of truth for the schema, R
 | `npm run dev` | Start the dev server |
 | `npm run build` | Production build |
 | `npm start` | Run the production build |
-| `npx next lint` | Lint the codebase |
+| `npm run lint` | Lint the codebase (ESLint) |
 | `npx tsc --noEmit` | Type-check without emitting files |
